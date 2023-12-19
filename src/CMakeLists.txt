@@ -34,7 +34,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE
-    ../third_party
+    ${THIRD_PARTY_PATH}
 )
 
 if(EMSCRIPTEN)
@@ -62,7 +62,7 @@ install(
 
 install(
     DIRECTORY 
-        ../third_party/spdlog
+        ${THIRD_PARTY_PATH}/spdlog
     DESTINATION ${INSTALL_PATH}/include
     COMPONENT ${PROJECT_NAME}
 )
