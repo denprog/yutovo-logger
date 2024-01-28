@@ -27,33 +27,55 @@ public:
     template<typename... Args>
     void Info(fmt::format_string<Args...> format, Args... args)
     {
+#ifdef EMSCRIPTEN
+        std::string m = fmt::format(format, std::forward<Args>(args)...);
+        printf("%s\n", m.c_str());
+#else
         log->info(format, std::forward<Args>(args)...);
         log->flush();
+#endif
     }
 
     template<typename... Args>
     void Debug(fmt::format_string<Args...> format, Args... args)
     {
+#ifdef EMSCRIPTEN
+        std::string m = fmt::format(format, std::forward<Args>(args)...);
+        printf("%s\n", m.c_str());
+#else
         log->debug(format, std::forward<Args>(args)...);
         log->flush();
+#endif
     }
 
     template<typename... Args>
     void Warning(fmt::format_string<Args...> format, Args... args)
     {
+#ifdef EMSCRIPTEN
+        std::string m = fmt::format(format, std::forward<Args>(args)...);
+        printf("%s\n", m.c_str());
+#else
         log->warn(format, std::forward<Args>(args)...);
         log->flush();
+#endif
     }
 
     template<typename... Args>
     void Error(fmt::format_string<Args...> format, Args... args)
     {
+#ifdef EMSCRIPTEN
+        std::string m = fmt::format(format, std::forward<Args>(args)...);
+        printf("%s\n", m.c_str());
+#else
         log->error(format, std::forward<Args>(args)...);
         log->flush();
+#endif
     }
 
 private:
+#ifndef EMSCRIPTEN
     std::shared_ptr<spdlog::logger> log;
+#endif
 };
 
 class LoggerFormatter : public spdlog::formatter

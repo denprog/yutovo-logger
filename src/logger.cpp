@@ -11,6 +11,7 @@ namespace yutovo
 
 Logger::Logger(const std::string& path, const std::string& name, bool in_console, bool in_file)
 {
+#ifndef EMSCRIPTEN
     std::vector<spdlog::sink_ptr> sinks;
     try
     {
@@ -44,6 +45,7 @@ Logger::Logger(const std::string& path, const std::string& name, bool in_console
 
     spdlog::set_pattern("[%H:%M:%S.%e][%t][%n][%l] %v");
     spdlog::set_level(spdlog::level::info);
+#endif
 }
 
 Logger* Logger::GetInstance(const std::string& path, const std::string& name, bool in_console, bool in_file)
@@ -54,34 +56,50 @@ Logger* Logger::GetInstance(const std::string& path, const std::string& name, bo
 
 void Logger::Info(const char* message)
 {
+#ifdef EMSCRIPTEN
+    printf("%s\n", message);
+#else
     if (!log)
         return;
     log->info(message);
     log->flush();
+#endif
 }
 
 void Logger::Debug(const char* message)
 {
+#ifdef EMSCRIPTEN
+    printf("%s\n", message);
+#else
     if (!log)
         return;
     log->debug(message);
     log->flush();
+#endif
 }
 
 void Logger::Warning(const char* message)
 {
+#ifdef EMSCRIPTEN
+    printf("%s\n", message);
+#else
     if (!log)
         return;
     log->warn(message);
     log->flush();
+#endif
 }
 
 void Logger::Error(const char* message)
 {
+#ifdef EMSCRIPTEN
+    printf("%s\n", message);
+#else
     if (!log)
         return;
     log->error(message);
     log->flush();
+#endif
 }
 
 //LoggerFormatter
