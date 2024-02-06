@@ -11,7 +11,7 @@ namespace yutovo
 class Logger
 {
 private:
-    Logger(const std::string& path, const std::string& name, bool in_console, bool in_file);
+    Logger(const std::string& _path, const std::string& _name, bool in_console, bool in_file);
 
 public:
     Logger(Logger const&) = delete;
@@ -75,6 +75,8 @@ public:
 private:
 #ifndef EMSCRIPTEN
     std::shared_ptr<spdlog::logger> log;
+    std::string path;
+    std::string name;
 #endif
 };
 

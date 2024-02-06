@@ -9,7 +9,9 @@ namespace yutovo
 
 //Logger
 
-Logger::Logger(const std::string& path, const std::string& name, bool in_console, bool in_file)
+Logger::Logger(const std::string& _path, const std::string& _name, bool in_console, bool in_file) :
+    path(_path),
+    name(_name)
 {
 #ifndef EMSCRIPTEN
     std::vector<spdlog::sink_ptr> sinks;
@@ -50,8 +52,14 @@ Logger::Logger(const std::string& path, const std::string& name, bool in_console
 
 Logger* Logger::GetInstance(const std::string& path, const std::string& name, bool in_console, bool in_file)
 {
-    static Logger log(path, name, in_console, in_file);
-    return &log;
+    static std::vector<std::shared_ptr<Logger>> loggers;
+    for (auto& logger : loggers)
+    {
+        if (logger->path == path && logger->name == name)
+            return logger.get();
+    }
+    loggers.emplace_back(new Logger(path, name, in_console, in_file));
+    return loggers[loggers.size() - 1].get();
 }
 
 void Logger::Info(const char* message)
