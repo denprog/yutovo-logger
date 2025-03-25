@@ -9,8 +9,11 @@ namespace yutovo
 
 //Logger
 
-Logger::Logger(const std::string& path, const std::string& name, bool in_console, bool in_file)
+Logger::Logger(const std::string& _path, const std::string& _name, bool in_console, bool in_file) :
+    path(_path),
+    name(_name)
 {
+#ifndef EMSCRIPTEN
     std::vector<spdlog::sink_ptr> sinks;
     try
     {
@@ -33,6 +36,7 @@ Logger::Logger(const std::string& path, const std::string& name, bool in_console
             sinks.push_back(std::make_shared<spdlog::sinks::daily_file_sink_mt>(p, 0, 0, false, 10));
         }
         log = std::make_shared<spdlog::logger>(name, begin(sinks), end(sinks));
+        log->set_level(spdlog::level::info);
 
         if (in_file)
             log->flush();
@@ -43,45 +47,121 @@ Logger::Logger(const std::string& path, const std::string& name, bool in_console
     }
 
     spdlog::set_pattern("[%H:%M:%S.%e][%t][%n][%l] %v");
-    spdlog::set_level(spdlog::level::info);
+#endif
 }
 
 Logger* Logger::GetInstance(const std::string& path, const std::string& name, bool in_console, bool in_file)
 {
-    static Logger log(path, name, in_console, in_file);
-    return &log;
+    static std::vector<std::shared_ptr<Logger>> loggers;
+    for (auto& logger : loggers)
+    {
+        if (logger->path == path && logger->name == name)
+            return logger.get();
+    }
+    loggers.emplace_back(new Logger(path, name, in_console, in_file));
+    return loggers[loggers.size() - 1].get();
 }
 
-void Logger::Info(const char* message)
+void Logger::Trace(const char* message)
 {
+#ifdef EMSCRIPTEN
+    if (log_level > LogLevel::LEVEL_TRACE)
+        return;
+    printf("[trace] %s\n", message);
+#else
     if (!log)
         return;
-    log->info(message);
+    log->trace(message);
     log->flush();
+#endif
 }
 
 void Logger::Debug(const char* message)
 {
+#ifdef EMSCRIPTEN
+    if (log_level > LogLevel::LEVEL_DEBUG)
+        return;
+    printf("[debug] %s\n", message);
+#else
     if (!log)
         return;
     log->debug(message);
     log->flush();
+#endif
+}
+
+void Logger::Info(const char* message)
+{
+#ifdef EMSCRIPTEN
+    if (log_level > LogLevel::LEVEL_INFO)
+        return;
+    printf("[info] %s\n", message);
+#else
+    if (!log)
+        return;
+    log->info(message);
+    log->flush();
+#endif
 }
 
 void Logger::Warning(const char* message)
 {
+#ifdef EMSCRIPTEN
+    if (log_level > LogLevel::LEVEL_WARNING)
+        return;
+    printf("[warning] %s\n", message);
+#else
     if (!log)
         return;
     log->warn(message);
     log->flush();
+#endif
 }
 
 void Logger::Error(const char* message)
 {
+#ifdef EMSCRIPTEN
+    if (log_level > LogLevel::LEVEL_ERROR)
+        return;
+    printf("[error] %s\n", message);
+#else
     if (!log)
         return;
     log->error(message);
     log->flush();
+#endif
+}
+
+void Logger::Critical(const char* message)
+{
+#ifdef EMSCRIPTEN
+    if (log_level > LogLevel::LEVEL_CRITICAL)
+        return;
+    printf("[critical] %s\n", message);
+#else
+    if (!log)
+        return;
+    log->critical(message);
+    log->flush();
+#endif
+}
+
+void Logger::SetLevel(int level)
+{
+#ifdef EMSCRIPTEN
+    log_level = (LogLevel)level;
+#else
+    log->set_level((spdlog::level::level_enum)level);
+#endif
+}
+
+LogLevel Logger::GetLevel()
+{
+#ifdef EMSCRIPTEN
+    return log_level;
+#else
+    return (LogLevel)log->level();
+#endif
 }
 
 //LoggerFormatter

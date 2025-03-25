@@ -2,11 +2,23 @@ cmake_minimum_required(VERSION 3.17)
 
 set(CMAKE_DEBUG_POSTFIX d)
 
+if(EMSCRIPTEN)
+    set(CMAKE_FIND_ROOT_PATH ${INSTALL_PATH}/wasm/cmake/)
+endif()
+
 find_package(PkgConfig REQUIRED)
+
+message("CMAKE_FIND_ROOT_PATH is ${CMAKE_FIND_ROOT_PATH}")
+message("INSTALL_PATH is ${INSTALL_PATH}")
 
 add_library(${PROJECT_NAME}
     logger.cpp
 )
+
+if(EMSCRIPTEN)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0 -g")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -s USE_PTHREADS=1 -s PTHREAD_POOL_SIZE=4")
+endif()
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
 	CXX_STANDARD 20
@@ -22,15 +34,24 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE
-    ../third_party
+    ${THIRD_PARTY_PATH}
 )
 
-install(
-    TARGETS ${PROJECT_NAME}
-    EXPORT ${PROJECT_NAME}
-    DESTINATION ${INSTALL_PATH}/lib
-    COMPONENT ${PROJECT_NAME}
-)
+if(EMSCRIPTEN)
+    install(
+        TARGETS ${PROJECT_NAME}
+        EXPORT ${PROJECT_NAME}
+        DESTINATION ${INSTALL_PATH}/wasm
+        COMPONENT ${PROJECT_NAME}
+    )
+else()
+    install(
+        TARGETS ${PROJECT_NAME}
+        EXPORT ${PROJECT_NAME}
+        DESTINATION ${INSTALL_PATH}/lib
+        COMPONENT ${PROJECT_NAME}
+    )
+endif()
 
 install(
     FILES 
@@ -41,20 +62,37 @@ install(
 
 install(
     DIRECTORY 
-        ../third_party/spdlog
+        ${THIRD_PARTY_PATH}/spdlog
     DESTINATION ${INSTALL_PATH}/include
     COMPONENT ${PROJECT_NAME}
 )
 
-install(
-    EXPORT ${PROJECT_NAME}
-    DESTINATION ${INSTALL_PATH}/lib/cmake/${PROJECT_NAME}
-    COMPONENT ${PROJECT_NAME}
-    FILE ${PROJECT_NAME}.cmake
-)
+if(EMSCRIPTEN)
+    install(
+        EXPORT ${PROJECT_NAME}
+        DESTINATION ${INSTALL_PATH}/wasm/cmake/${PROJECT_NAME}
+        COMPONENT ${PROJECT_NAME}
+        FILE ${PROJECT_NAME}.cmake
+    )
+else()
+    install(
+        EXPORT ${PROJECT_NAME}
+        DESTINATION ${INSTALL_PATH}/lib/cmake/${PROJECT_NAME}
+        COMPONENT ${PROJECT_NAME}
+        FILE ${PROJECT_NAME}.cmake
+    )
+endif()
 
-install(
-    FILES ${PROJECT_NAME}-config.cmake
-    DESTINATION ${INSTALL_PATH}/lib/cmake/${PROJECT_NAME}
-    COMPONENT ${PROJECT_NAME}
-)
+if(EMSCRIPTEN)
+    install(
+        FILES ${PROJECT_NAME}-config.cmake
+        DESTINATION ${INSTALL_PATH}/wasm/cmake/${PROJECT_NAME}
+        COMPONENT ${PROJECT_NAME}
+    )
+else()
+    install(
+        FILES ${PROJECT_NAME}-config.cmake
+        DESTINATION ${INSTALL_PATH}/lib/cmake/${PROJECT_NAME}
+        COMPONENT ${PROJECT_NAME}
+    )
+endif()
