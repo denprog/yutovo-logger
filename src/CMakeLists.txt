@@ -38,7 +38,6 @@ if(NOT WIN32)
     )
     target_include_directories(${PROJECT_NAME} PRIVATE ${THIRD_PARTY_PATH})
 else()
-    target_link_libraries(${PROJECT_NAME} PRIVATE spdlog::spdlog_header_only)
     target_include_directories(${PROJECT_NAME} PRIVATE ${INSTALL_PATH}/include)
 endif()
 
