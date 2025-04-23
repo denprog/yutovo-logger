@@ -1,8 +1,9 @@
 #ifndef __LOGGER_H__
 #define __LOGGER_H__
 
-#include "spdlog/spdlog.h"
-#include "spdlog/sinks/daily_file_sink.h"
+#define FMT_HEADER_ONLY
+#include <spdlog/spdlog.h>
+#include <spdlog/sinks/daily_file_sink.h>
 #include <utility>
 
 namespace yutovo

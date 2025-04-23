@@ -3,6 +3,9 @@
 #include <iostream>
 #include <filesystem>
 #include <spdlog/sinks/stdout_sinks.h>
+#ifdef _WIN32
+#include <shlobj_core.h>
+#endif
 
 namespace yutovo
 {
@@ -184,10 +187,10 @@ void LoggerFormatter::format(const spdlog::details::log_msg &msg, spdlog::memory
     std::tm t = spdlog::details::os::localtime(spdlog::log_clock::to_time_t(msg.time));
 
     for (auto &f : formatters)
-        f->format(msg, t, dest);
+       f->format(msg, t, dest);
 
     if (dest.size() > 0 && dest[dest.size() - 1] != '\r' && dest[dest.size() - 1] != '\n')
-        spdlog::details::fmt_helper::append_string_view(spdlog::details::os::default_eol, dest);
+       spdlog::details::fmt_helper::append_string_view(spdlog::details::os::default_eol, dest);
 }
 
 std::unique_ptr<spdlog::formatter> LoggerFormatter::clone() const

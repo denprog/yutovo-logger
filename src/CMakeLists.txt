@@ -2,40 +2,45 @@ cmake_minimum_required(VERSION 3.17)
 
 set(CMAKE_DEBUG_POSTFIX d)
 
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS ON)
+set(POSITION_INDEPENDENT_CODE ON)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
 if(EMSCRIPTEN)
     set(CMAKE_FIND_ROOT_PATH ${INSTALL_PATH}/wasm/cmake/)
 endif()
 
 find_package(PkgConfig REQUIRED)
-
-message("CMAKE_FIND_ROOT_PATH is ${CMAKE_FIND_ROOT_PATH}")
-message("INSTALL_PATH is ${INSTALL_PATH}")
+if(WIN32)
+    find_package(spdlog REQUIRED)
+endif()
 
 add_library(${PROJECT_NAME}
     logger.cpp
+    logger.h
 )
+
+if(WIN32)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /utf-8")
+endif()
 
 if(EMSCRIPTEN)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0 -g")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -s USE_PTHREADS=1 -s PTHREAD_POOL_SIZE=4")
 endif()
 
-set_target_properties(${PROJECT_NAME} PROPERTIES
-	CXX_STANDARD 20
-	CXX_STANDARD_REQUIRED ON
-	CXX_EXTENSIONS OFF
-	POSITION_INDEPENDENT_CODE ON
-    CMAKE_INCLUDE_CURRENT_DIR ON
-)
-
-target_link_libraries(${PROJECT_NAME} PRIVATE 
-    stdc++
-    pthread
-)
-
-target_include_directories(${PROJECT_NAME} PRIVATE
-    ${THIRD_PARTY_PATH}
-)
+if(NOT WIN32)
+    target_link_libraries(${PROJECT_NAME} PRIVATE 
+       stdc++
+       pthread
+    )
+    target_include_directories(${PROJECT_NAME} PRIVATE ${THIRD_PARTY_PATH})
+else()
+    target_link_libraries(${PROJECT_NAME} PRIVATE spdlog::spdlog_header_only)
+    target_include_directories(${PROJECT_NAME} PRIVATE ${INSTALL_PATH}/include)
+endif()
 
 if(EMSCRIPTEN)
     install(
@@ -60,12 +65,14 @@ install(
     COMPONENT ${PROJECT_NAME}
 )
 
-install(
-    DIRECTORY 
-        ${THIRD_PARTY_PATH}/spdlog
-    DESTINATION ${INSTALL_PATH}/include
-    COMPONENT ${PROJECT_NAME}
-)
+if(NOT WIN32)
+    install(
+       DIRECTORY 
+           ${THIRD_PARTY_PATH}/spdlog
+       DESTINATION ${INSTALL_PATH}/include
+       COMPONENT ${PROJECT_NAME}
+    )
+endif()
 
 if(EMSCRIPTEN)
     install(
