@@ -14,6 +14,7 @@ endif()
 
 find_package(PkgConfig REQUIRED)
 if(WIN32)
+	set(CMAKE_PREFIX_PATH "${INSTALL_PATH}")
     find_package(spdlog REQUIRED)
 endif()
 
@@ -38,6 +39,7 @@ if(NOT WIN32)
     )
     target_include_directories(${PROJECT_NAME} PRIVATE ${THIRD_PARTY_PATH})
 else()
+    #target_link_libraries(${PROJECT_NAME} PRIVATE spdlog::spdlog_header_only)
     target_include_directories(${PROJECT_NAME} PRIVATE ${INSTALL_PATH}/include)
 endif()
 
