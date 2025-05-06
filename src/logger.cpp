@@ -3,9 +3,6 @@
 #include <iostream>
 #include <filesystem>
 #include <spdlog/sinks/stdout_sinks.h>
-#ifdef _WIN32
-#include <shlobj_core.h>
-#endif
 
 namespace yutovo
 {
@@ -27,15 +24,9 @@ Logger::Logger(const std::string& _path, const std::string& _name, bool in_conso
             sinks.push_back(s);
         }
 
-        std::string p;
         if (in_file)
         {
-#ifdef _WIN32
-            char szPath[MAX_PATH];
-            if (SUCCEEDED(SHGetFolderPathA(NULL, CSIDL_COMMON_APPDATA, NULL, 0, szPath)))
-                p = std::string(szPath);
-#endif
-            p += path + "/" + name + ".log";
+            std::string p = path + "/" + name + ".log";
             sinks.push_back(std::make_shared<spdlog::sinks::daily_file_sink_mt>(p, 0, 0, false, 10));
         }
         log = std::make_shared<spdlog::logger>(name, begin(sinks), end(sinks));
