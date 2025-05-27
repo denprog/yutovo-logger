@@ -46,6 +46,8 @@ Logger::Logger(const std::string& _path, const std::string& _name, bool in_conso
 
 Logger* Logger::GetInstance(const std::string& path, const std::string& name, bool in_console, bool in_file)
 {
+    static std::mutex loggers_mutex;
+    std::unique_lock<std::mutex> lock(loggers_mutex);
     static std::vector<std::shared_ptr<Logger>> loggers;
     for (auto& logger : loggers)
     {
