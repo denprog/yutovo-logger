@@ -15,30 +15,25 @@ Logger::Logger(const std::string& _path, const std::string& _name, bool in_conso
 {
 #ifndef EMSCRIPTEN
     std::vector<spdlog::sink_ptr> sinks;
-    try
+    if (in_console)
     {
-        if (in_console)
-        {
-            auto s = std::make_shared<spdlog::sinks::stdout_sink_st>();
-            s->set_formatter(std::unique_ptr<spdlog::formatter>(new LoggerFormatter()));
-            sinks.push_back(s);
-        }
-
-        if (in_file)
-        {
-            std::string p = path + "/" + name + ".log";
-            sinks.push_back(std::make_shared<spdlog::sinks::daily_file_sink_mt>(p, 0, 0, false, 10));
-        }
-        log = std::make_shared<spdlog::logger>(name, begin(sinks), end(sinks));
-        log->set_level(spdlog::level::info);
-
-        if (in_file)
-            log->flush();
+        auto s = std::make_shared<spdlog::sinks::stdout_sink_st>();
+        s->set_formatter(std::unique_ptr<spdlog::formatter>(new LoggerFormatter()));
+        sinks.push_back(s);
     }
-    catch (spdlog::spdlog_ex& ex)
+
+    if (in_file)
     {
-        std::cout << ex.what();
+        std::string p = path + "/" + name + ".log";
+        sinks.push_back(std::make_shared<spdlog::sinks::daily_file_sink_mt>(p, 0, 0, false, 10));
     }
+    log = std::make_shared<spdlog::logger>(name, begin(sinks), end(sinks));
+    if (!log)
+        throw std::runtime_error("Creating log error");
+    log->set_level(spdlog::level::info);
+
+    if (in_file)
+        log->flush();
 
     spdlog::set_pattern("[%H:%M:%S.%e][%t][%n][%l] %v");
 #endif
