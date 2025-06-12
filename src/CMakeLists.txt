@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.17)
 
 set(CMAKE_DEBUG_POSTFIX d)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS ON)
 set(POSITION_INDEPENDENT_CODE ON)
@@ -30,6 +30,7 @@ endif()
 if(EMSCRIPTEN)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0 -g")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -s USE_PTHREADS=1 -s PTHREAD_POOL_SIZE=4")
+    target_compile_options(${PROJECT_NAME} PUBLIC -Wno-deprecated-literal-operator)
 endif()
 
 if(NOT WIN32)
