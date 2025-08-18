@@ -5,6 +5,10 @@ project(yutovo_logger
     LANGUAGES CXX
 )
 
+set(PROJECT_LICENSE "GPL-3.0-only")
+
+message(STATUS "Project license: ${PROJECT_LICENSE}")
+
 add_compile_definitions(DEBUG)
 
 if(WIN32)
