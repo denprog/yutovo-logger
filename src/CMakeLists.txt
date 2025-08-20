@@ -13,9 +13,12 @@ if(EMSCRIPTEN)
 endif()
 
 find_package(PkgConfig REQUIRED)
+
 if(WIN32)
 	set(CMAKE_PREFIX_PATH "${INSTALL_PATH}")
     find_package(spdlog REQUIRED)
+elseif(NOT EMSCRIPTEN)
+    find_package(spdlog REQUIRED PATHS ${INSTALL_PATH}/lib/cmake/)
 endif()
 
 add_library(${PROJECT_NAME}
@@ -38,11 +41,18 @@ if(NOT WIN32)
        stdc++
        pthread
     )
-    target_include_directories(${PROJECT_NAME} PRIVATE ${THIRD_PARTY_PATH})
 else()
-    #target_link_libraries(${PROJECT_NAME} PRIVATE spdlog::spdlog_header_only)
     target_include_directories(${PROJECT_NAME} PRIVATE ${INSTALL_PATH}/include)
 endif()
+
+target_include_directories(${PROJECT_NAME} PUBLIC
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    ${INSTALL_PATH}/include
+)
+
+target_include_directories(${PROJECT_NAME} PUBLIC
+    $<INSTALL_INTERFACE:${INSTALL_PATH}/include>
+)
 
 if(EMSCRIPTEN)
     install(
@@ -66,15 +76,6 @@ install(
     DESTINATION ${INSTALL_PATH}/include/${PROJECT_NAME}
     COMPONENT ${PROJECT_NAME}
 )
-
-if(NOT WIN32)
-    install(
-       DIRECTORY 
-           ${THIRD_PARTY_PATH}/spdlog
-       DESTINATION ${INSTALL_PATH}/include
-       COMPONENT ${PROJECT_NAME}
-    )
-endif()
 
 if(EMSCRIPTEN)
     install(
