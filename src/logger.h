@@ -129,7 +129,7 @@ public:
 #endif
     }
 
-    void SetLevel(int level);
+    void SetLevel(LogLevel level);
     LogLevel GetLevel();
 
 private:
