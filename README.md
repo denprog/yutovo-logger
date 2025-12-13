@@ -5,7 +5,7 @@ Yutovo logger is a part of the Yutovo project, which aims logging info of other 
 
 ## Building for Ubuntu
 
-Install requirements:
+Install the requirements:
 
 ```
 sudo apt update && sudo apt install -y git cmake g++ pkg-config libspdlog-dev
@@ -32,6 +32,69 @@ Create the build directories and build the debug version:
 ```
 mkdir -p build/debug
 cd build/debug
+cmake -DCMAKE_BUILD_TYPE=Debug ../..
+make -sj && make install
+```
+
+## Building for Emscripten
+
+Install if you haven't [emscripten](https://emscripten.org/docs/getting_started/downloads.html).
+
+Clone the project in the yutovo dir (select another branch if you want):
+
+```
+cd yutovo
+git clone -b develop https://github.com/denprog/yutovo-logger.git
+```
+
+Create the build directory:
+
+```
+cd yutovo-logger
+mkdir -p build_web/debug
+cd build_web/debug
+```
+
+Set these variables:
+
+```
+export YUTOVO_DEPLOY=~/yutovo/deploy
+source ~/emsdk/emsdk_env.sh
+```
+
+Build the project:
+
+```
+emcmake cmake -DCMAKE_BUILD_TYPE=Debug ../..
+make -sj && make install
+```
+
+## Building for Windows
+
+Install the requirements:
+
+```
+vcpkg install spdlog
+```
+
+Clone the project in the yutovo dir (select another branch if you want):
+
+```
+cd yutovo
+git clone -b develop https://github.com/denprog/yutovo-logger.git
+```
+
+Create the build directory:
+
+```
+cd yutovo-logger
+mkdir -p build/debug
+cd build/debug
+```
+
+Build the project:
+
+```
 cmake -DCMAKE_BUILD_TYPE=Debug ../..
 make -sj && make install
 ```
