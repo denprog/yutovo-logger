@@ -144,7 +144,7 @@ void Logger::Critical(const char* message)
 #endif
 }
 
-void Logger::SetLevel(int level)
+void Logger::SetLevel(LogLevel level)
 {
 #ifdef EMSCRIPTEN
     log_level = (LogLevel)level;
