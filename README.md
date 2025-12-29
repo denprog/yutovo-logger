@@ -35,3 +35,28 @@ cd build/debug
 cmake -DCMAKE_BUILD_TYPE=Debug ../..
 make -sj && make install
 ```
+
+## Building for Windows
+
+Set the VCPKG_ROOT variable to your vcpkg path. Install the requirements:
+
+Clone the project in the yutovo dir (select another branch if you want):
+
+```
+cd yutovo
+git clone -b develop https://github.com/denprog/yutovo-logger.git
+```
+
+Create the build directory:
+
+```
+cd yutovo-desktop
+mkdir "build/debug"
+cd build/debug
+```
+
+Build the project:
+
+```
+cmake --build . --config Debug ../..
+```
