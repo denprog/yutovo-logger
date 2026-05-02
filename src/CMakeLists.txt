@@ -27,7 +27,7 @@ add_library(${PROJECT_NAME}
 )
 
 if(WIN32)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /utf-8")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /utf-8 /MP")
 endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
