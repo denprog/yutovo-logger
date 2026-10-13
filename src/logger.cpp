@@ -24,7 +24,7 @@ Logger::Logger(const std::string& _path, const std::string& _name, bool in_conso
     std::vector<spdlog::sink_ptr> sinks;
     if (in_console)
     {
-        auto s = std::make_shared<spdlog::sinks::stdout_sink_st>();
+        auto s = std::make_shared<spdlog::sinks::stdout_sink_mt>();
         s->set_formatter(std::unique_ptr<spdlog::formatter>(new LoggerFormatter()));
         sinks.push_back(s);
     }
