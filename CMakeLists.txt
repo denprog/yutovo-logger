@@ -8,7 +8,9 @@ set(PROJECT_LICENSE "GPL-3.0-only")
 
 message(STATUS "Project license: ${PROJECT_LICENSE}")
 
-add_compile_definitions(DEBUG)
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_compile_definitions(DEBUG)
+endif()
 
 if(WIN32)
     set(INSTALL_PATH "$ENV{VCPKG_ROOT}/installed/x64-windows")
