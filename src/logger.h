@@ -12,6 +12,7 @@
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/daily_file_sink.h>
 #include <utility>
+#include <atomic>
 
 namespace yutovo
 {
@@ -137,7 +138,7 @@ private:
     std::string name;
 
 #ifdef EMSCRIPTEN
-    LogLevel log_level = LogLevel::LEVEL_INFO;
+    std::atomic<LogLevel> log_level = LogLevel::LEVEL_INFO;
 #else
     std::shared_ptr<spdlog::logger> log;
 #endif
