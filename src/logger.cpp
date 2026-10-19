@@ -42,7 +42,7 @@ Logger::Logger(const std::string& _path, const std::string& _name, bool in_conso
     if (in_file)
         log->flush();
 
-    spdlog::set_pattern("[%H:%M:%S.%e][%t][%n][%l] %v");
+    log->set_pattern("[%H:%M:%S.%e][%t][%n][%l] %v");
 #endif
 }
 
