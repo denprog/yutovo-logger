@@ -13,6 +13,7 @@
 #include <spdlog/sinks/daily_file_sink.h>
 #include <utility>
 #include <atomic>
+#include <chrono>
 
 namespace yutovo
 {
@@ -38,6 +39,9 @@ public:
     void operator=(Logger const&) = delete;
 
     static Logger* GetInstance(const std::string& path, const std::string& name, bool in_console, bool in_file);
+
+    //Set the limits of the logger cache used by GetInstance, tests use a small limit and a zero grace interval to force eviction
+    static void SetCacheLimits(size_t max_loggers, std::chrono::milliseconds grace);
 
     void Trace(const char* message);
     void Debug(const char* message);
@@ -136,6 +140,7 @@ public:
 private:
     std::string path;
     std::string name;
+    std::chrono::steady_clock::time_point last_use;
 
 #ifdef EMSCRIPTEN
     std::atomic<LogLevel> log_level = LogLevel::LEVEL_INFO;

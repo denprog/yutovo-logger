@@ -9,16 +9,23 @@
 #include <memory>
 #include <iostream>
 #include <filesystem>
+#include <algorithm>
 #include <spdlog/sinks/stdout_sinks.h>
 
 namespace yutovo
 {
 
+static size_t max_cached_loggers = 256;
+static std::chrono::milliseconds unused_logger_grace = std::chrono::minutes(10);
+
+static std::mutex loggers_mutex;
+
 //Logger
 
 Logger::Logger(const std::string& _path, const std::string& _name, bool in_console, bool in_file) :
     path(_path),
-    name(_name)
+    name(_name),
+    last_use(std::chrono::steady_clock::now())
 {
 #ifndef EMSCRIPTEN
     std::vector<spdlog::sink_ptr> sinks;
@@ -48,16 +55,42 @@ Logger::Logger(const std::string& _path, const std::string& _name, bool in_conso
 
 Logger* Logger::GetInstance(const std::string& path, const std::string& name, bool in_console, bool in_file)
 {
-    static std::mutex loggers_mutex;
     std::unique_lock<std::mutex> lock(loggers_mutex);
     static std::vector<std::shared_ptr<Logger>> loggers;
+    std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
     for (auto& logger : loggers)
     {
         if (logger->path == path && logger->name == name)
+        {
+            logger->last_use = now;
             return logger.get();
+        }
     }
+
+    //Drop the oldest unused loggers so that their file handles are closed, the cache may temporarily
+    //grow above the limit when more loggers than max_cached_loggers are used within the grace interval
+    if (loggers.size() >= max_cached_loggers)
+    {
+        std::sort(loggers.begin(), loggers.end(),
+            [](const std::shared_ptr<Logger>& left, const std::shared_ptr<Logger>& right) -> bool
+            {
+                return left->last_use < right->last_use;
+            });
+        size_t removed = 0;
+        while (loggers.size() - removed >= max_cached_loggers && removed < loggers.size() && now - loggers[removed]->last_use >= unused_logger_grace)
+            ++removed;
+        loggers.erase(loggers.begin(), loggers.begin() + removed);
+    }
+
     loggers.emplace_back(new Logger(path, name, in_console, in_file));
     return loggers[loggers.size() - 1].get();
+}
+
+void Logger::SetCacheLimits(size_t max_loggers, std::chrono::milliseconds grace)
+{
+    std::unique_lock<std::mutex> lock(loggers_mutex);
+    max_cached_loggers = max_loggers;
+    unused_logger_grace = grace;
 }
 
 void Logger::Trace(const char* message)
